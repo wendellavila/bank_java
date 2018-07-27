@@ -1,0 +1,29 @@
+/**********************************
+Paleta de cores
+
+Rosa:           #ff263eff
+Azul:           #0c0a1eff
+Branco puro:    #fff
+Branco suave:   #f0f0f0
+Preto:          #101010
+
+**********************************/
+.root {
+    -fx-background-color: #f0f0f0;
+}
+.navbar {
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0,0,0);
+}
+.footer {
+    -fx-background-color: #101010;
+}
+.navbar-buttons {
+    -fx-background-color: #fff;
+    -fx-font: 16 Arial;
+    -fx-text-fill: #ff263eff;
+}
+.footer-copyright {
+    -fx-text-alignment: center;
+    -fx-text-fill: #ff263eff;
+}
