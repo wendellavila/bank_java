@@ -15,6 +15,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -26,7 +27,7 @@ import javafx.stage.Stage;
 
 public class TestaBanco extends Application {
     
-    Scene homePage, sobrePage, relatorioPage, adicionarPage;
+    Scene homePage, sobrePage, relatorioPage, addClientePage;
     Stage window;
 
     public static void main(String[] args) {
@@ -34,6 +35,7 @@ public class TestaBanco extends Application {
         Banco banco = Banco.getBanco();
         Cliente cliente;
         Conta conta;
+        RelatorioClientes relatorio = new RelatorioClientes();
 
         // Cria dois clientes e suas contas
         banco.adicionarCliente("Jane", "Simms");
@@ -95,6 +97,7 @@ public class TestaBanco extends Application {
                              + " Tem um saldo dem conta corrente de "
                              + conta.getSaldo());
         }
+        //System.out.println(relatorio.geraRelatorio());
         launch(args);
     }
     
@@ -163,7 +166,6 @@ public class TestaBanco extends Application {
         HBox titleBar = new HBox(10);
         titleBar.getStyleClass().add("title-bar");
         titleBar.setPrefHeight(45);
-        titleBar.setPrefWidth(2000);
         titleBar.setAlignment(Pos.CENTER);
         Label pageTitle = new Label("Sistema JavaBank de gerenciamento de clientes");
         pageTitle.getStyleClass().add("page-title");
@@ -175,7 +177,7 @@ public class TestaBanco extends Application {
         leftButton.getStyleClass().add("options-button");
         leftButton.setPrefHeight(400);
         leftButton.setPrefWidth(400);
-        //leftButton.setOnAction(e -> openAdicionarPage());
+        leftButton.setOnAction(e -> openAddClientePage());
         
         //botão direito
         Button rightButton = new Button("Gerar Relatório");
@@ -238,30 +240,29 @@ public class TestaBanco extends Application {
         titleBar.getChildren().add(pageTitle);
         
         //caixa de texto
-        HBox textBar = new HBox(10);
-        textBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
-        textBar.getStyleClass().add("text-bar");
-        textBar.setPrefHeight(400);
-        textBar.setPrefWidth(3000);
-        textBar.setAlignment(Pos.TOP_LEFT);
+        HBox contentBar = new HBox(10);
+        contentBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        contentBar.getStyleClass().add("content-bar");
+        contentBar.setPrefHeight(400);
+        contentBar.setPrefWidth(3000);
+        contentBar.setAlignment(Pos.TOP_LEFT);
         
-        Label infoTitle = new Label("Desenvolvido Por:          ");
+        Label infoTitle = new Label("Desenvolvido por:          ");
         infoTitle.getStyleClass().add("page-title");
         Label infoText = new Label("Wendell J. C. Ávila\nRA: 2017.1.08.013\n\nDisciplina: Programação Orientada a Objetos\n"
                                     + "Universidade Federal de Alfenas\n\n27/07/2018");
         infoText.getStyleClass().add("page-text");
-        textBar.getChildren().addAll(infoTitle, infoText);
+        contentBar.getChildren().addAll(infoTitle, infoText);
         
         GridPane.setConstraints(titleBar, 0, 0);
-        GridPane.setConstraints(textBar, 0, 8);
+        GridPane.setConstraints(contentBar, 0, 8);
         
-        grid.getChildren().addAll(titleBar, textBar);
+        grid.getChildren().addAll(titleBar, contentBar);
         
         template.setCenter(grid);
         window.setScene(sobrePage);
         window.show();
     }
-    
     public void openRelatorioPage(){
         
         RelatorioClientes relatorio = new RelatorioClientes();
@@ -290,25 +291,80 @@ public class TestaBanco extends Application {
         pageTitle.getStyleClass().add("page-title");
         titleBar.getChildren().add(pageTitle);
         
-        //caixa de texto
-        HBox textBar = new HBox(10);
-        textBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
-        textBar.getStyleClass().add("text-bar");
-        textBar.setPrefHeight(400);
-        textBar.setPrefWidth(3000);
-        textBar.setAlignment(Pos.TOP_LEFT);
-        
-        Label infoText = new Label(relatorio.relatorio);
-        infoText.getStyleClass().add("page-text");
-        textBar.getChildren().add(infoText);
+        TextArea textArea = new TextArea(relatorio.geraRelatorio());
+        textArea.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        textArea.getStyleClass().add("content-bar");
+        textArea.setPrefHeight(400);
+        textArea.setPrefWidth(3000);
+        //textArea.setAlignment(Pos.TOP_LEFT);
         
         GridPane.setConstraints(titleBar, 0, 0);
-        GridPane.setConstraints(textBar, 0, 8);
+        GridPane.setConstraints(textArea, 0, 8);
         
-        grid.getChildren().addAll(titleBar, textBar);
+        grid.getChildren().addAll(titleBar, textArea);
         
         template.setCenter(grid);
         window.setScene(relatorioPage);
+        window.show();
+    }
+    
+    public void openAddClientePage(){
+        
+        BorderPane template = new BorderPane();
+        template = addNavbarAndFooter(template);
+        
+        addClientePage = new Scene(template, 1300, 700);
+        addClientePage.getStylesheets().add("stylesheet.css");
+        
+        //titulo
+        HBox titleBar = new HBox(10);
+        titleBar.getStyleClass().add("title-bar");
+        titleBar.setPrefHeight(45); 
+        titleBar.setAlignment(Pos.CENTER);
+        Label pageTitle = new Label("Adicionar Cliente");
+        pageTitle.getStyleClass().add("page-title");
+        titleBar.getChildren().add(pageTitle);
+        
+        //conteudo
+        HBox contentBar = new HBox();
+        contentBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        contentBar.getStyleClass().add("content-bar");
+        contentBar.setPrefHeight(400);
+        //leftButton.setOnAction(e -> openAdicionarPage());
+        
+        //botão direito
+        Button rightButton = new Button("Gerar Relatório");
+        rightButton.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        rightButton.getStyleClass().add("options-button");
+        rightButton.setPrefHeight(400);
+        rightButton.setPrefWidth(400);
+        rightButton.setOnAction(e -> openRelatorioPage());
+        
+        //grid
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(50, 100, 50, 100)); //cima, esq, baixo, dir
+        grid.setVgap(40);
+        grid.setHgap(30);
+        grid.setGridLinesVisible(true);
+        
+        grid.setAlignment(Pos.CENTER);
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        ColumnConstraints col3 = new ColumnConstraints();
+        col1.setPercentWidth(25);
+        col2.setPercentWidth(50);
+        col3.setPercentWidth(25);
+        grid.getColumnConstraints().addAll(col1, col2, col3);
+        
+        grid.add(titleBar, 0, 0, 3, 1); //colindex, rowindex, colspan, rowspan
+        grid.add(contentBar, 1, 1);
+        
+        GridPane.setHalignment(contentBar, HPos.CENTER);
+        
+        
+        template.setCenter(grid);
+        window.setScene(addClientePage);
         window.show();
     }
 }

@@ -15,24 +15,25 @@ public class RelatorioClientes {
 
         Banco banco = Banco.getBanco();
         Cliente cliente;
-
+        Conta conta;
+        
         System.out.println("\t\t\tRelatório de Clientes");
         System.out.println("\t\t\t================");
 
         int indiceCliente = banco.getNumeroDeClientes();
         int indiceConta;
 
-        while(indiceCliente > 0){
-            cliente = banco.getCliente(indiceCliente);
+        for(int i = 0; i < indiceCliente; i++) {
+            cliente = banco.getCliente(i);
             indiceConta = cliente.getNumeroDeContas();
 
             System.out.println();
             System.out.println("Cliente: " + cliente.getUltimoNome() + ", " + cliente.getPrimeiroNome());
 
-            relatorio += "Cliente: " + cliente.getUltimoNome() + ", "+ cliente.getPrimeiroNome() + "\n";
+            relatorio += "\nCliente: " + cliente.getUltimoNome() + ", "+ cliente.getPrimeiroNome() + "\n";
 
-            while(indiceConta > 0) {
-                Conta conta = cliente.getConta(indiceConta);
+            for(int j = 0; j < indiceConta; j++) {
+                conta = cliente.getConta(j);
                 String  tipoConta = "";
 
                 // Determina o tipo de conta
@@ -51,9 +52,8 @@ public class RelatorioClientes {
                          + formatoMonetario.format(conta.getSaldo()));
 
                 relatorio += "    " + tipoConta + ": Saldo atual de " + formatoMonetario.format(conta.getSaldo()) + "\n";
-                indiceConta--;
             }
-            indiceCliente--;
+            relatorio+= "\n";
         }
         return relatorio;
     }
