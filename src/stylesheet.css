@@ -8,6 +8,8 @@ Branco suave:   #f0f0f0
 Preto:          #101010
 
 **********************************/
+
+/***************************** navbar e footer ***************************/
 .root {
     -fx-background-color: #f0f0f0;
 }
@@ -15,15 +17,50 @@ Preto:          #101010
     -fx-background-color: #fff;
     -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 10, 0,0,0);
 }
-.footer {
-    -fx-background-color: #101010;
-}
 .navbar-buttons {
     -fx-background-color: #fff;
     -fx-font: 16 Arial;
     -fx-text-fill: #ff263eff;
+    -fx-background-radius: 0;
 }
+.navbar-buttons:hover {
+    -fx-text-fill: #0c0a1eff;
+}
+.footer {
+    -fx-background-color: #101010;
+}
+
 .footer-copyright {
     -fx-text-alignment: center;
     -fx-text-fill: #ff263eff;
 }
+
+/********************************* scenes *******************************/
+.page-title {
+    -fx-font: 16 Arial;
+    -fx-text-fill: #0c0a1eff;
+}
+.page-text {
+    -fx-font: 14 Arial;
+    -fx-text-fill: #0c0a1eff;
+}
+.title-bar {
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0,0,0);
+}
+.text-bar {
+    -fx-background-color: #fff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0,0,0);
+}
+.options-button {
+    -fx-font: 24 Arial;
+    -fx-text-fill: #fff;
+    -fx-background-color: #0c0a1eff;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 6, 0,0,0);
+    -fx-background-radius: 0;
+}
+.options-button:hover {
+    -fx-text-fill: #ff263eff;
+    -fx-background-color: #0c0a1eff;
+}
+

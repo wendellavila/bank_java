@@ -1,13 +1,15 @@
 /*
 * Esta classe cria um programa para testar as classes do projeto banco.
 * Ela cria um conjunto de clientes, com algumas contas,
-* e gera um relatoorio do saldo atual em conta.
+* e gera um relatorio do saldo atual em conta.
 */
 
 import banco.dominio.*;
+import banco.relatorios.*;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -16,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -23,12 +26,11 @@ import javafx.stage.Stage;
 
 public class TestaBanco extends Application {
     
-    Scene homePage, sobrePage;
-    Scene auxPage = new Scene(new BorderPane(), 1300, 700);
+    Scene homePage, sobrePage, relatorioPage, adicionarPage;
     Stage window;
 
     public static void main(String[] args) {
-        launch(args);
+        
         Banco banco = Banco.getBanco();
         Cliente cliente;
         Conta conta;
@@ -53,7 +55,7 @@ public class TestaBanco extends Application {
         try {
           System.out.println("Conta Corrente [Jane Simms] : Saque de R$ 150,00");
           conta.sacar(150.00);
-          System.out.println("Conta Corrente [Jane Simms] : dep�sito de R$ 22,50");
+          System.out.println("Conta Corrente [Jane Simms] : deposito de R$ 22,50");
           conta.depositar(22.50);
           System.out.println("Conta Corrente [Jane Simms] : Saque de R$ 147,62");
           conta.sacar(147.62);
@@ -93,7 +95,10 @@ public class TestaBanco extends Application {
                              + " Tem um saldo dem conta corrente de "
                              + conta.getSaldo());
         }
+        launch(args);
     }
+    
+    //=================================== javafx ==========================================//
 
     @Override
     public void start(Stage stage) throws Exception {
@@ -101,41 +106,22 @@ public class TestaBanco extends Application {
         window = stage;
         openHomePage();
         
-        //==========================window================================//
+        //========================= window ===============================//
         window.setTitle("JavaBank");
         window.show();
     }
     
     public BorderPane addNavbarAndFooter(BorderPane template){
         
-        //================navbar e footer======================//
+        //=============== navbar e footer =====================//
         
         //==navbar-buttons==//
         Button homebutton = new Button("Home"), sobrebutton = new Button("Sobre");
         homebutton.getStyleClass().add("navbar-buttons");
         sobrebutton.getStyleClass().add("navbar-buttons");
         
-        homebutton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event){
-                //remover cena atual que ja esta usando o template template
-                if(window.getScene() != null){
-                    window.setScene(auxPage);
-                }
-                openHomePage();
-            }
-        });
-        sobrebutton.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event){
-                //remover cena atual que ja esta usando o template template
-                if(window.getScene() != null){
-                    window.setScene(auxPage);
-                }
-                System.out.println("teste");
-                openSobrePage();
-            }
-        });
+        homebutton.setOnAction(e -> openHomePage());
+        sobrebutton.setOnAction(e -> openSobrePage());
         
         //=====navbar======//
         HBox navbar = new HBox(10);
@@ -170,23 +156,59 @@ public class TestaBanco extends Application {
         BorderPane template = new BorderPane();
         template = addNavbarAndFooter(template);
         
-        homePage = new Scene(template, 1300, 700);
-        homePage.getStylesheets().add("stylesheet.css");
+        sobrePage = new Scene(template, 1300, 700);
+        sobrePage.getStylesheets().add("stylesheet.css");
         
+        //titulo
+        HBox titleBar = new HBox(10);
+        titleBar.getStyleClass().add("title-bar");
+        titleBar.setPrefHeight(45);
+        titleBar.setPrefWidth(2000);
+        titleBar.setAlignment(Pos.CENTER);
+        Label pageTitle = new Label("Sistema JavaBank de gerenciamento de clientes");
+        pageTitle.getStyleClass().add("page-title");
+        titleBar.getChildren().add(pageTitle);
+        
+        //botão esquerdo
+        Button leftButton = new Button("Adicionar Cliente");
+        leftButton.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        leftButton.getStyleClass().add("options-button");
+        leftButton.setPrefHeight(400);
+        leftButton.setPrefWidth(400);
+        //leftButton.setOnAction(e -> openAdicionarPage());
+        
+        //botão direito
+        Button rightButton = new Button("Gerar Relatório");
+        rightButton.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        rightButton.getStyleClass().add("options-button");
+        rightButton.setPrefHeight(400);
+        rightButton.setPrefWidth(400);
+        rightButton.setOnAction(e -> openRelatorioPage());
+        
+        //grid
         GridPane grid = new GridPane();
-        HBox titleBox = new HBox();
-        grid.setPadding(new Insets(50, 50, 80, 80)); //cima, baixo, dir, esq
-        grid.setVgap(8);
-        grid.setHgap(10);
+        grid.setPadding(new Insets(50, 100, 50, 100)); //cima, esq, baixo, dir
+        grid.setVgap(40);
+        grid.setHgap(30);
         
-        Label sceneTitle = new Label("Home");
-        GridPane.setConstraints(sceneTitle, 0, 0);
+        grid.setAlignment(Pos.CENTER);
         
-        grid.getChildren().add(sceneTitle);
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(50);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(50);
+        grid.getColumnConstraints().addAll(col1,col2);
+        
+        grid.add(titleBar, 0, 0, 2, 1); //colindex, rowindex, colspan, rowspan
+        grid.add(leftButton, 0, 1);
+        grid.add(rightButton, 1, 1);
+        
+        GridPane.setHalignment(leftButton, HPos.CENTER);
+        GridPane.setHalignment(rightButton, HPos.CENTER);
+        
         
         template.setCenter(grid);
-        
-        window.setScene(homePage);
+        window.setScene(sobrePage);
         window.show();
     }
     public void openSobrePage(){
@@ -197,20 +219,96 @@ public class TestaBanco extends Application {
         sobrePage = new Scene(template, 1300, 700);
         sobrePage.getStylesheets().add("stylesheet.css");
         
+        //grid
         GridPane grid = new GridPane();
         HBox titleBox = new HBox();
-        grid.setPadding(new Insets(50, 50, 80, 80)); //cima, baixo, dir, esq
+        grid.setPadding(new Insets(50, 100, 50, 100)); //cima, esq, baixo, dir
         grid.setVgap(8);
         grid.setHgap(10);
         
-        Label sceneTitle = new Label("Sobre");
-        GridPane.setConstraints(sceneTitle, 5, 5);
+        //titulo
+        HBox titleBar = new HBox(10);
+        titleBar.getStyleClass().add("title-bar");
+        titleBar.setPrefHeight(45);
+        titleBar.setPrefWidth(3000);
+        titleBar.setAlignment(Pos.CENTER);
         
-        grid.getChildren().add(sceneTitle);
+        Label pageTitle = new Label("Sobre o sistema");
+        pageTitle.getStyleClass().add("page-title");
+        titleBar.getChildren().add(pageTitle);
+        
+        //caixa de texto
+        HBox textBar = new HBox(10);
+        textBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        textBar.getStyleClass().add("text-bar");
+        textBar.setPrefHeight(400);
+        textBar.setPrefWidth(3000);
+        textBar.setAlignment(Pos.TOP_LEFT);
+        
+        Label infoTitle = new Label("Desenvolvido Por:          ");
+        infoTitle.getStyleClass().add("page-title");
+        Label infoText = new Label("Wendell J. C. Ávila\nRA: 2017.1.08.013\n\nDisciplina: Programação Orientada a Objetos\n"
+                                    + "Universidade Federal de Alfenas\n\n27/07/2018");
+        infoText.getStyleClass().add("page-text");
+        textBar.getChildren().addAll(infoTitle, infoText);
+        
+        GridPane.setConstraints(titleBar, 0, 0);
+        GridPane.setConstraints(textBar, 0, 8);
+        
+        grid.getChildren().addAll(titleBar, textBar);
         
         template.setCenter(grid);
-        
         window.setScene(sobrePage);
+        window.show();
+    }
+    
+    public void openRelatorioPage(){
+        
+        RelatorioClientes relatorio = new RelatorioClientes();
+        
+        BorderPane template = new BorderPane();
+        template = addNavbarAndFooter(template);
+        
+        relatorioPage = new Scene(template, 1300, 700);
+        relatorioPage.getStylesheets().add("stylesheet.css");
+        
+        //grid
+        GridPane grid = new GridPane();
+        HBox titleBox = new HBox();
+        grid.setPadding(new Insets(50, 100, 50, 100)); //cima, esq, baixo, dir
+        grid.setVgap(8);
+        grid.setHgap(10);
+        
+        //titulo
+        HBox titleBar = new HBox(10);
+        titleBar.getStyleClass().add("title-bar");
+        titleBar.setPrefHeight(45);
+        titleBar.setPrefWidth(3000);
+        titleBar.setAlignment(Pos.CENTER);
+        
+        Label pageTitle = new Label("Relatório dos clientes e suas contas");
+        pageTitle.getStyleClass().add("page-title");
+        titleBar.getChildren().add(pageTitle);
+        
+        //caixa de texto
+        HBox textBar = new HBox(10);
+        textBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        textBar.getStyleClass().add("text-bar");
+        textBar.setPrefHeight(400);
+        textBar.setPrefWidth(3000);
+        textBar.setAlignment(Pos.TOP_LEFT);
+        
+        Label infoText = new Label(relatorio.relatorio);
+        infoText.getStyleClass().add("page-text");
+        textBar.getChildren().add(infoText);
+        
+        GridPane.setConstraints(titleBar, 0, 0);
+        GridPane.setConstraints(textBar, 0, 8);
+        
+        grid.getChildren().addAll(titleBar, textBar);
+        
+        template.setCenter(grid);
+        window.setScene(relatorioPage);
         window.show();
     }
 }
