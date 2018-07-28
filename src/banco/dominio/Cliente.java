@@ -25,7 +25,6 @@ public class Cliente {
 	
 	public void setConta(Conta criarconta){
 		int indice = getNumeroDeContas();
-		//conta[numeroDeContas] = criarconta;
 		conta.add(indice, criarconta);
 	}
 

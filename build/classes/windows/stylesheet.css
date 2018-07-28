@@ -63,4 +63,10 @@ Preto:          #101010
     -fx-text-fill: #ff263eff;
     -fx-background-color: #0c0a1eff;
 }
+.text-field {
+    -fx-border-color: #0c0a1eff;
+    -fx-border-width: 2;
+    -fx-background-color: #fff;
+    -fx-background-radius: 0;
+}
 

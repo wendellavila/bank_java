@@ -29,6 +29,17 @@ public class Banco {
 	public Cliente getCliente(int indice) {
 		return cliente.get(indice);
 	}
+        public int getClienteIndex(String p, String u){
+            for(int i = 0; i < getNumeroDeClientes(); i++){
+                Cliente temp = cliente.get(i);
+                String pnome = temp.getPrimeiroNome();
+                String unome = temp.getUltimoNome();
+                if(pnome.equals(p) && unome.equals(u)){
+                    return cliente.indexOf(temp);
+                }
+            }
+            return -1;
+        }
 	
 	
 	
