@@ -1,5 +1,8 @@
 package banco.dominio;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class ContaCorrente extends Conta {
 	
 	private double chequeEspecial;
@@ -11,21 +14,31 @@ public class ContaCorrente extends Conta {
 		super(saldo);
 		chequeEspecial = protecao;
 	}
-	public void sacar(double total) throws ExcecaoChequeEspecial {
+	public String sacar(double total) {
+            
+                NumberFormat formatoMonetario = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+                String mensagem = "";
+                
 		if(total <= super.saldo) {
-			super.saldo -= total;
+                    super.saldo -= total;
+                    return mensagem;
 		}
 		else if(total <= super.saldo + chequeEspecial){
-			double temp = chequeEspecial;
-			chequeEspecial += (super.saldo - total);
-			super.saldo -= total - temp;
+                    double temp = chequeEspecial;
+                    chequeEspecial += (super.saldo - total);
+                    super.saldo -= total - temp;
+                    return mensagem;
 		}
-		else if(total > super.saldo + chequeEspecial && chequeEspecial != 0) {
-			super.saldo = 0;
-			throw new ExcecaoChequeEspecial("O cheque especial não foi suficiente para cobrir o saque.", total);
+		else if(total > super.saldo + chequeEspecial && chequeEspecial == 0) {
+                    mensagem = "Saldo insuficiente para realizar o saque. Conta sem cheque especial. Déficit: "
+                                + formatoMonetario.format(total - super.saldo);
+                    super.saldo = 0;
+                    return mensagem;
 		}
 		else {
-			throw new ExcecaoChequeEspecial("Não há saldo suficiente e conta sem cheque especial", total - (super.saldo + chequeEspecial));
+                    mensagem = "O cheque especial não foi suficiente para cobrir o saque. Déficit: "
+                                + formatoMonetario.format( (total - (super.saldo + chequeEspecial)) );
+                    return mensagem;
 		}
 	}
 	public double getChequeEspecial() {

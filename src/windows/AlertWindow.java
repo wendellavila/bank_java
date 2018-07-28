@@ -48,7 +48,7 @@ public class AlertWindow {
         GridPane.setHalignment(closeButton, HPos.CENTER);
         
         //scene
-        Scene alertPage = new Scene(grid, 500, 250);
+        Scene alertPage = new Scene(grid, 800, 250);
         
         //stage
         alertPage.getStylesheets().add("windows/stylesheet.css");

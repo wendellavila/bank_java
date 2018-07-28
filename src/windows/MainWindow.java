@@ -6,6 +6,8 @@ import banco.dominio.Conta;
 import banco.dominio.ContaCorrente;
 import banco.dominio.ContaPoupanca;
 import banco.relatorios.RelatorioClientes;
+import java.text.NumberFormat;
+import java.util.Locale;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -94,7 +96,7 @@ public class MainWindow {
         titleBar.getStyleClass().add("title-bar");
         titleBar.setPrefHeight(45);
         titleBar.setAlignment(Pos.CENTER);
-        Label pageTitle = new Label("Sistema JavaBank de gerenciamento de clientes");
+        Label pageTitle = new Label("Sistema JavaBank de gerenciamento de contas");
         pageTitle.getStyleClass().add("page-title");
         titleBar.getChildren().add(pageTitle);
         
@@ -206,7 +208,7 @@ public class MainWindow {
         
         Label infoTitle = new Label("Desenvolvido por:          ");
         infoTitle.getStyleClass().add("page-title");
-        Label infoText = new Label("Wendell J. C. Ávila\nRA: 2017.1.08.013\n\nDisciplina: Programação Orientada a Objetos\n"
+        Label infoText = new Label("Wendell João Castro de Ávila\nRA: 2017.1.08.013\n\nDisciplina: Programação Orientada a Objetos\n"
                                     + "Universidade Federal de Alfenas\n\n28/07/2018");
         infoText.getStyleClass().add("page-text");
         contentBar.getChildren().addAll(infoTitle, infoText);
@@ -308,13 +310,20 @@ public class MainWindow {
         searchButton.setOnAction(e -> {
             String nome = nomeField.getText();
             String sobrenome = sobrenomeField.getText();
-            banco.adicionarCliente(nome, sobrenome);
-            OptionWindow optionWindow = new OptionWindow();
-            optionWindow.display("Cliente Adicionado com sucesso.\nDeseja adicionar contas a esse cliente?", "Sucesso");
-            boolean option = optionWindow.getOption();
-            if(option){
-                int pos = banco.getNumeroDeClientes() - 1;
-                openAddContaPage(pos);
+            
+            if(nome.isEmpty() || sobrenome.isEmpty()){
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
+            }
+            else {
+                banco.adicionarCliente(nome, sobrenome);
+                OptionWindow optionWindow = new OptionWindow();
+                optionWindow.display("Cliente Adicionado com sucesso.\nDeseja adicionar contas a esse cliente?", "Sucesso");
+                boolean option = optionWindow.getOption();
+                if(option){
+                    int pos = banco.getNumeroDeClientes() - 1;
+                    openAddContaPage(pos);
+                }
             }
         });
         GridPane.setHalignment(searchButton, HPos.CENTER);
@@ -399,8 +408,8 @@ public class MainWindow {
         
         //labels
         Label poupancaLabel = new Label("Conta Poupança");
-        Label valorPoupancaLabel = new Label("Valor: ");
-        Label taxaPoupancaLabel = new Label("Taxa: ");
+        Label valorPoupancaLabel = new Label("Valor: R$");
+        Label taxaPoupancaLabel = new Label("Taxa: %");
         poupancaLabel.getStyleClass().add("page-title");
         valorPoupancaLabel.getStyleClass().add("page-title");
         taxaPoupancaLabel.getStyleClass().add("page-title");
@@ -409,7 +418,7 @@ public class MainWindow {
         GridPane.setHalignment(taxaPoupancaLabel, HPos.RIGHT);
         
         Label correnteLabel = new Label("Conta Corrente sem proteção");
-        Label valorCorrenteLabel = new Label("Valor: ");
+        Label valorCorrenteLabel = new Label("Valor: R$");
         correnteLabel.getStyleClass().add("page-title");
         valorCorrenteLabel.getStyleClass().add("page-title");
         GridPane.setHalignment(correnteLabel, HPos.CENTER);
@@ -417,9 +426,9 @@ public class MainWindow {
         
         Label correnteProtLabel = new Label("Conta Corrente com Proteção");
         correnteProtLabel.getStyleClass().add("page-title");
-        Label valorCorrenteProtLabel = new Label("Valor Corrente: ");
-        Label valorPoupancaProtLabel = new Label("Valor Poupança: ");
-        Label taxaProtLabel = new Label("Taxa Poupança: ");
+        Label valorCorrenteProtLabel = new Label("Valor Corrente: R$");
+        Label valorPoupancaProtLabel = new Label("Valor Poupança: R$");
+        Label taxaProtLabel = new Label("Taxa Poupança: %");
         valorCorrenteProtLabel.getStyleClass().add("page-title");
         valorPoupancaProtLabel.getStyleClass().add("page-title");
         taxaProtLabel.getStyleClass().add("page-title");
@@ -451,22 +460,23 @@ public class MainWindow {
             Double valor, taxa;
             String valorString = valorPoupancaField.getText();
             String taxaString = poupancaTaxaField.getText();
-            if(valorString.isEmpty()){
-                valor = 0.0;
+            if(valorString.isEmpty() || taxaString.isEmpty()){
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
             }
             else {
                 valor = Double.parseDouble(valorString);
-            }
-            if(taxaString.isEmpty()){
-                taxa = 0.0;
-            }
-            else {
                 taxa = Double.parseDouble(taxaString);
+                if(valor < 0 || taxa < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Valores negativos não são permitidos", "Erro");
+                }
+                else {
+                    cliente.setConta(new ContaPoupanca(valor, taxa));
+                    AlertWindow alertPoupanca = new AlertWindow();
+                    alertPoupanca.display("Conta poupança adicionada com sucesso.", "Sucesso");
+                }
             }
-            
-            cliente.setConta(new ContaPoupanca(valor, taxa));
-            AlertWindow alertPoupanca = new AlertWindow();
-            alertPoupanca.display("Conta poupança adicionada com sucesso.", "Sucesso");
         });
         GridPane.setHalignment(sendPoupanca, HPos.CENTER);
         
@@ -475,18 +485,25 @@ public class MainWindow {
         sendCorrente.setPrefHeight(55);
         sendCorrente.setPrefWidth(55);
         sendCorrente.setOnAction(e -> {
+            
             Double valor;
             String valorString = valorCorrenteField.getText();
             if(valorString.isEmpty()){
-                valor = 0.0;
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
             }
             else {
                 valor = Double.parseDouble(valorString);
+                if(valor < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Valores negativos não são permitidos", "Erro");
+                }
+                else {
+                    cliente.setConta(new ContaCorrente(valor));
+                    AlertWindow alertCorrente = new AlertWindow();
+                    alertCorrente.display("Conta corrente sem proteção adicionada com sucesso.", "Sucesso");
+                } 
             }
-
-            cliente.setConta(new ContaCorrente(valor));
-            AlertWindow alertCorrente = new AlertWindow();
-            alertCorrente.display("Conta poupança sem proteção adicionada com sucesso.", "Sucesso");
         });
         GridPane.setHalignment(sendCorrente, HPos.CENTER);
         
@@ -499,30 +516,27 @@ public class MainWindow {
             String valorCorrenteString = valorProtCorrenteField.getText();
             String valorPoupancaString = valorProtCorrenteField.getText();
             String taxaString = taxaProtPoupancaField.getText();
-            if(valorCorrenteString.isEmpty()){
-                valorCorrente = 0.0;
+            
+            if(valorCorrenteString.isEmpty() || valorPoupancaString.isEmpty() || taxaString.isEmpty()){
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
             }
             else {
                 valorCorrente = Double.parseDouble(valorCorrenteString);
-            }
-            if(valorPoupancaString.isEmpty()){
-                valorPoupanca = 0.0;
-            }
-            else {
                 valorPoupanca = Double.parseDouble(valorPoupancaString);
-            }
-            if(taxaString.isEmpty()){
-                taxa = 0.0;
-            }
-            else {
                 taxa = Double.parseDouble(taxaString);
+                if(valorCorrente < 0 || valorPoupanca < 0 || taxa < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Valores negativos não são permitidos", "Erro");
+                }
+                else {
+                    cliente.setConta(new ContaPoupanca(valorPoupanca, taxa));
+                    cliente.setConta(new ContaCorrente(valorCorrente, valorPoupanca));
+
+                    AlertWindow alertCorrenteProt = new AlertWindow();
+                    alertCorrenteProt.display("Conta corrente com proteção adicionada com sucesso.", "Sucesso");
+                }
             }
-            
-            cliente.setConta(new ContaPoupanca(valorPoupanca, taxa));
-            cliente.setConta(new ContaCorrente(valorCorrente, valorPoupanca));
-            
-            AlertWindow alertCorrenteProt = new AlertWindow();
-            alertCorrenteProt.display("Conta poupança com proteção adicionada com sucesso.", "Sucesso");
         });
         GridPane.setHalignment(sendCorrenteProt, HPos.CENTER);
         
@@ -551,14 +565,14 @@ public class MainWindow {
         RowConstraints row5 = new RowConstraints();
         RowConstraints row6 = new RowConstraints();
         
-        col1.setPercentWidth(7);
-        col2.setPercentWidth(22);
+        col1.setPercentWidth(9);
+        col2.setPercentWidth(20);
         col3.setPercentWidth(1);
-        col4.setPercentWidth(7);
-        col5.setPercentWidth(22);
+        col4.setPercentWidth(9);
+        col5.setPercentWidth(20);
         col6.setPercentWidth(1);
-        col7.setPercentWidth(16);
-        col8.setPercentWidth(22);
+        col7.setPercentWidth(19);
+        col8.setPercentWidth(19);
         col9.setPercentWidth(1);
         row1.setPercentHeight(12);
         row2.setPercentHeight(20);
@@ -648,13 +662,19 @@ public class MainWindow {
             String nome = nomeField.getText();
             String sobrenome = sobrenomeField.getText();
             
-            int index = banco.getClienteIndex(nome, sobrenome);
-            if(index < 0){
+            if(nome.isEmpty() || sobrenome.isEmpty()){
                 AlertWindow alertWindow = new AlertWindow();
-                alertWindow.display("Não existe um cliente cadastrado com esses dados.", "Erro");
+                alertWindow.display("Existem campos vazios", "Erro");
             }
             else {
-                openAddContaPage(index);
+                int index = banco.getClienteIndex(nome, sobrenome);
+                if(index < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Não existe um cliente cadastrado com esses dados.", "Erro");
+                }
+                else {
+                    openAddContaPage(index);
+                }
             }
         });
         GridPane.setHalignment(searchButton, HPos.CENTER);
@@ -739,7 +759,7 @@ public class MainWindow {
         
         //labels
         Label credenciaisLabel = new Label("Credenciais do cliente");
-        Label contaLabel = new Label("Número da conta - 0 a 2");
+        Label contaLabel = new Label("Número da conta");
         Label nomeLabel = new Label("Nome: ");
         Label sobrenomeLabel = new Label("Sobrenome: ");
         Label numeroLabel = new Label("Número: ");
@@ -773,22 +793,33 @@ public class MainWindow {
             String nomeString = nomeField.getText();
             String sobrenomeString = sobrenomeField.getText();
             String numeroString = numeroField.getText();
-            int numero = Integer.parseInt(numeroString);
             
-            int index = banco.getClienteIndex(nomeString, sobrenomeString);
-            if(index < 0){
+            if(nomeString.isEmpty() || sobrenomeString.isEmpty() || numeroString.isEmpty()){
                 AlertWindow alertWindow = new AlertWindow();
-                alertWindow.display("Não existe um cliente cadastrado com esses dados.", "Erro");
+                alertWindow.display("Existem campos vazios", "Erro");
             }
             else {
-                cliente = banco.getCliente(index);
-                int indexContas = cliente.getNumeroDeContas() - 1;
-                if(numero > indexContas || numero < 0){
+                int numero = Integer.parseInt(numeroString);
+            
+                int index = banco.getClienteIndex(nomeString, sobrenomeString);
+                if(index < 0){
                     AlertWindow alertWindow = new AlertWindow();
-                    alertWindow.display("O cliente não tem uma conta com o número fornecido", "Erro");
+                    alertWindow.display("Não existe um cliente cadastrado com esses dados.", "Erro");
                 }
                 else {
-                    openHomePage();
+                    cliente = banco.getCliente(index);
+                    int indexContas = cliente.getNumeroDeContas() - 1;
+                    if(numero < 0){
+                        AlertWindow alertWindow = new AlertWindow();
+                        alertWindow.display("O número da conta deve ser positivo", "Erro");
+                    }
+                    else if(numero > indexContas){
+                        AlertWindow alertWindow = new AlertWindow();
+                        alertWindow.display("O cliente não tem uma conta com o número fornecido", "Erro");
+                    }
+                    else {
+                        openOperacoesPage(index, numero);
+                    }
                 }
             }
         });
@@ -823,13 +854,13 @@ public class MainWindow {
         col4.setPercentWidth(9);
         col5.setPercentWidth(8);
         col6.setPercentWidth(25);
-        row1.setPercentHeight(12);
-        row2.setPercentHeight(14.6);
-        row3.setPercentHeight(14.6);
-        row4.setPercentHeight(14.6);
-        row5.setPercentHeight(14.6);
-        row6.setPercentHeight(14.6);
-        row7.setPercentHeight(14.6);
+        row1.setPercentHeight(11);
+        row2.setPercentHeight(14.7);
+        row3.setPercentHeight(14.7);
+        row4.setPercentHeight(14.7);
+        row5.setPercentHeight(14.7);
+        row6.setPercentHeight(14.7);
+        row7.setPercentHeight(14.7);
         
         grid.getColumnConstraints().addAll(col1, col2, col3, col4, col5, col6);
         grid.getRowConstraints().addAll(row1, row2, row3, row4, row5, row6, row7);
@@ -848,6 +879,204 @@ public class MainWindow {
         
         template.setCenter(grid);
         window.setScene(searchOperacoesPage);
+        window.show();
+    }
+    public void openOperacoesPage(int clienteIndex, int contaIndex){
+        
+        NumberFormat formatoMonetario = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+        
+        BorderPane template = new BorderPane();
+        template = addNavbarAndFooter(template);
+        cliente = banco.getCliente(clienteIndex);
+        conta = cliente.getConta(contaIndex);
+        
+        operacoesPage = new Scene(template, 1300, 700);
+        operacoesPage.getStylesheets().add("windows/stylesheet.css");
+        
+        //titulo
+        HBox titleBar = new HBox(10);
+        titleBar.getStyleClass().add("title-bar");
+        titleBar.setPrefHeight(45); 
+        titleBar.setAlignment(Pos.CENTER);
+        
+        Label pageTitle = new Label("Realizar operações bancárias");
+        pageTitle.getStyleClass().add("page-title");
+        titleBar.getChildren().add(pageTitle);
+        
+        //conteudo
+        HBox contentBar = new HBox();
+        contentBar.setPadding(new Insets(30, 40, 30, 40)); //cima, esq, baixo, dir
+        contentBar.getStyleClass().add("content-bar");
+        contentBar.setPrefHeight(400);
+        GridPane.setHalignment(contentBar, HPos.CENTER);
+        
+        //labels
+        Label saldoLabel = new Label("Consultar Saldo");
+        Label saqueLabel = new Label("Saque");
+        Label depositoLabel = new Label("Depósito");
+        Label valorSaqueLabel = new Label("Valor: R$");
+        Label valorDepositoLabel = new Label("Valor: R$");
+        
+        saldoLabel.getStyleClass().add("page-title");
+        saqueLabel.getStyleClass().add("page-title");
+        depositoLabel.getStyleClass().add("page-title");
+        valorSaqueLabel.getStyleClass().add("page-title");
+        valorDepositoLabel.getStyleClass().add("page-title");
+        
+        GridPane.setHalignment(saldoLabel, HPos.CENTER);
+        GridPane.setHalignment(saqueLabel, HPos.CENTER);
+        GridPane.setHalignment(depositoLabel, HPos.CENTER);
+        GridPane.setHalignment(valorSaqueLabel, HPos.RIGHT);
+        GridPane.setHalignment(valorDepositoLabel, HPos.RIGHT);
+        
+        //textfields
+        TextField valorSaqueField = new TextField();
+        TextField valorDepositoField = new TextField();
+        valorSaqueField.getStyleClass().add("text-field");
+        valorDepositoField.getStyleClass().add("text-field");
+        
+        //botão sacar
+        Button saldoButton = new Button("Saldo");
+        saldoButton.getStyleClass().add("options-button");
+        saldoButton.setPrefHeight(50);
+        saldoButton.setPrefWidth(150);
+        saldoButton.setOnAction(e -> {
+            AlertWindow alertWindow = new AlertWindow();
+            alertWindow.display("O saldo da conta é de: " + formatoMonetario.format(conta.getSaldo()), "Saldo");
+        });
+
+        //botão sacar
+        Button sacarButton = new Button("Sacar");
+        sacarButton.getStyleClass().add("options-button");
+        sacarButton.setPrefHeight(50);
+        sacarButton.setPrefWidth(150);
+        sacarButton.setOnAction(e -> {
+            String valorString = valorSaqueField.getText();
+            
+            if(valorString.isEmpty()){
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
+            }
+            else {
+                double valor = Double.parseDouble(valorString);
+            
+                if(valor < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Valores negativos não são permitidos", "Erro");
+                }
+                else {
+                    String mensagem = conta.sacar(valor);
+                    if(mensagem.isEmpty()){
+                        AlertWindow alertWindow = new AlertWindow();
+                        alertWindow.display("Saque Realizado com sucesso. Saldo: " + formatoMonetario.format(conta.getSaldo()), "Sucesso");
+                    }
+                    else {
+                        AlertWindow alertWindow = new AlertWindow();
+                        alertWindow.display(mensagem, "Erro");
+                    }
+                }
+            }
+        });
+        GridPane.setHalignment(sacarButton, HPos.CENTER);
+        
+        //botão sacar
+        Button depositarButton = new Button("Depositar");
+        depositarButton.getStyleClass().add("options-button");
+        depositarButton.setPrefHeight(50);
+        depositarButton.setPrefWidth(150);
+        depositarButton.setOnAction(e -> {
+            String valorString = valorDepositoField.getText();
+            
+            if(valorString.isEmpty()){
+                AlertWindow alertWindow = new AlertWindow();
+                alertWindow.display("Existem campos vazios", "Erro");
+            }
+            else {
+                double valor = Double.parseDouble(valorString);
+            
+                if(valor < 0){
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Valores negativos não são permitidos", "Erro");
+                }
+                else {
+                    conta.depositar(valor);
+                    AlertWindow alertWindow = new AlertWindow();
+                    alertWindow.display("Depósito Realizado com sucesso. Saldo: " + formatoMonetario.format(conta.getSaldo()), "Sucesso");
+                }
+            }
+        });
+        GridPane.setHalignment(depositarButton, HPos.CENTER);
+        
+        //grid
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(50, 100, 50, 100)); //cima, esq, baixo, dir
+        grid.setVgap(20);
+        grid.setHgap(30);
+        grid.setGridLinesVisible(true);
+        
+        grid.setAlignment(Pos.CENTER);
+        
+        ColumnConstraints col1 = new ColumnConstraints();
+        ColumnConstraints col2 = new ColumnConstraints();
+        ColumnConstraints col3 = new ColumnConstraints();
+        ColumnConstraints col4 = new ColumnConstraints();
+        ColumnConstraints col5 = new ColumnConstraints();
+        ColumnConstraints col6 = new ColumnConstraints();
+        ColumnConstraints col7 = new ColumnConstraints();
+        ColumnConstraints col8 = new ColumnConstraints();
+        ColumnConstraints col9 = new ColumnConstraints();
+        ColumnConstraints col10 = new ColumnConstraints();
+        ColumnConstraints col11 = new ColumnConstraints();
+        ColumnConstraints col12 = new ColumnConstraints();
+        RowConstraints row1 = new RowConstraints();
+        RowConstraints row2 = new RowConstraints();
+        RowConstraints row3 = new RowConstraints();
+        RowConstraints row4 = new RowConstraints();
+        RowConstraints row5 = new RowConstraints();
+        RowConstraints row6 = new RowConstraints();
+        RowConstraints row7 = new RowConstraints();
+        
+        col1.setPercentWidth(10);
+        col2.setPercentWidth(11);
+        col3.setPercentWidth(6);
+        col4.setPercentWidth(5);
+        col5.setPercentWidth(10);
+        col6.setPercentWidth(11);
+        col7.setPercentWidth(6);
+        col8.setPercentWidth(5);
+        col9.setPercentWidth(10);
+        col10.setPercentWidth(11);
+        col11.setPercentWidth(6);
+        col12.setPercentWidth(5);
+        row1.setPercentHeight(11);
+        row2.setPercentHeight(14.7);
+        row3.setPercentHeight(14.7);
+        row4.setPercentHeight(14.7);
+        row5.setPercentHeight(14.7);
+        row6.setPercentHeight(14.7);
+        row7.setPercentHeight(14.7);
+        
+        grid.getColumnConstraints().addAll(col1, col2, col3, col4, col5, col6, col7, col8, col9, col10, col11, col12);
+        grid.getRowConstraints().addAll(row1, row2, row3, row4, row5, row6, row7);
+        
+        grid.add(titleBar, 0, 0, 12, 1); //colindex, rowindex, colspan, rowspan
+        grid.add(contentBar, 0, 1, 12, 6);
+        
+        grid.add(saldoLabel, 0, 1, 4, 1);
+        grid.add(saldoButton, 1, 2, 2, 1);
+        
+        grid.add(saqueLabel, 4, 1, 4, 1);
+        grid.add(valorSaqueLabel, 4, 2);
+        grid.add(valorSaqueField, 5, 2, 2, 1);
+        grid.add(sacarButton, 5, 3, 2, 1);
+        
+        grid.add(depositoLabel, 8, 1, 4, 1);
+        grid.add(valorDepositoLabel, 8, 2);
+        grid.add(valorDepositoField, 9, 2, 2, 1);
+        grid.add(depositarButton, 9, 3, 2, 1);
+        
+        template.setCenter(grid);
+        window.setScene(operacoesPage);
         window.show();
     }
 }

@@ -1,5 +1,8 @@
 package banco.dominio;
 
+import java.text.NumberFormat;
+import java.util.Locale;
+
 public class Conta {
 
 	protected double saldo;
@@ -13,25 +16,31 @@ public class Conta {
 	}
 	
 	public boolean depositar(double valor){
-		if(valor > 0) {
-			saldo += valor;
-			return true;
-		}
-		else {
-			return false;
-		}
+            if(valor > 0) {
+                saldo += valor;
+                return true;
+            }
+            else {
+                return false;
+            }
 		
 	}
-	public void sacar(double valor) throws ExcecaoChequeEspecial {
-		if(valor <= saldo) {
-			saldo -= valor;
-		}
-		else {
-			throw new ExcecaoChequeEspecial("Saldo insuficiente", valor);
-		}
+	public String sacar(double valor){
+            
+            NumberFormat formatoMonetario = NumberFormat.getCurrencyInstance(new Locale("pt", "BR"));
+            String mensagem = "";
+            
+            if(valor <= saldo) {
+                saldo -= valor;
+                return mensagem;
+            }
+            else {
+                mensagem = "Saldo insuficiente para realizar o saque. Déficit: " + formatoMonetario.format(valor - saldo);
+                return mensagem;
+            }
 	}
 	public double getChequeEspecial() {
-		return 0;
+            return 0;
 	}
 	
 }
